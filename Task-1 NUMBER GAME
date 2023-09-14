@@ -1,0 +1,117 @@
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+public class NumberGuessingGame extends JFrame {
+    private int targetNumber;            // The number the player needs to guess
+    private int maxAttempts = 10;        // Maximum number of attempts allowed
+    private int attempts = 0;            // Current number of attempts
+    private int score = 0;               // Player's score
+    private int rounds = 0;              // Number of rounds played
+    private JTextField guessField;       // Input field for the player's guess
+    private JLabel promptLabel;          // Label to display instructions
+    private JLabel resultLabel;          // Label to display the result of each guess
+    private JLabel scoreLabel;           // Label to display score and rounds
+    private JButton guessButton;         // Button to submit a guess
+    private JButton playAgainButton;     // Button to start a new round
+
+    public NumberGuessingGame() {
+        // Set up the JFrame
+        this.setTitle("Number Guessing Game");
+        this.setSize(400, 200);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLayout(new GridLayout(5, 1));
+
+        // Create and add GUI components
+        this.promptLabel = new JLabel("I've selected a number between 1 and 100. Try to guess it!");
+        this.promptLabel.setHorizontalAlignment(0);
+        this.add(this.promptLabel);
+        this.guessField = new JTextField(10);
+        this.guessField.setHorizontalAlignment(0);
+        this.add(this.guessField);
+        this.guessButton = new JButton("Guess");
+        this.add(this.guessButton);
+        this.resultLabel = new JLabel("");
+        this.resultLabel.setHorizontalAlignment(0);
+        this.add(this.resultLabel);
+        this.scoreLabel = new JLabel("Score: 0 Rounds: 0");
+        this.scoreLabel.setHorizontalAlignment(0);
+        this.add(this.scoreLabel);
+
+        // Add action listeners to buttons
+        this.guessButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                NumberGuessingGame.this.processGuess();
+            }
+        });
+        this.playAgainButton = new JButton("Play Again");
+        this.add(this.playAgainButton);
+        this.playAgainButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                NumberGuessingGame.this.initializeGame();
+            }
+        });
+
+        // Initialize the game when the program starts
+        this.initializeGame();
+    }
+
+    private void initializeGame() {
+        // Generate a random target number
+        Random random = new Random();
+        this.targetNumber = random.nextInt(100) + 1;
+
+        // Reset game variables
+        this.attempts = 0;
+        this.guessField.setText("");
+        this.resultLabel.setText("");
+        this.guessButton.setEnabled(true);
+        this.playAgainButton.setEnabled(false);
+        this.rounds++;
+    }
+
+    private void processGuess() {
+        String userInput = this.guessField.getText();
+
+        try {
+            int userGuess = Integer.parseInt(userInput);
+            ++this.attempts;
+
+            if (userGuess < this.targetNumber) {
+                this.resultLabel.setText("Too low! Try again.");
+            } else if (userGuess > this.targetNumber) {
+                this.resultLabel.setText("Too high! Try again.");
+            } else {
+                this.resultLabel.setText("Congratulations! You guessed the correct number in " + this.attempts + " attempts.");
+                ++this.score;
+                this.playAgainButton.setEnabled(true);
+                this.guessButton.setEnabled(false);
+            }
+
+            if (this.attempts == this.maxAttempts) {
+                this.resultLabel.setText("Sorry, you've run out of attempts. The correct number was " + this.targetNumber + ".");
+                this.playAgainButton.setEnabled(true);
+                this.guessButton.setEnabled(false);
+            }
+
+            this.scoreLabel.setText("Score: " + this.score + " Rounds: " + this.rounds);
+        } catch (NumberFormatException var3) {
+            this.resultLabel.setText("Invalid input. Please enter a number.");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                NumberGuessingGame game = new NumberGuessingGame();
+                game.setVisible(true);
+            }
+        });
+    }
+}
