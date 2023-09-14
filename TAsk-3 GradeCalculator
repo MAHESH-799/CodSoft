@@ -1,0 +1,102 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class GradeCalculatorGUI extends JFrame {
+    private JButton calculateButton;
+    private JLabel resultLabel;
+    private JTextField[] marksFields;
+    private static final int NUM_SUBJECTS = 6;
+
+    public GradeCalculatorGUI() {
+        setTitle("Grade Calculator");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(NUM_SUBJECTS + 2, 2));
+
+        marksFields = new JTextField[NUM_SUBJECTS];
+
+        // Create input fields for each subject and corresponding labels
+        for (int i = 0; i < NUM_SUBJECTS; i++) {
+            JLabel subjectLabel = new JLabel("Enter marks for Subject " + (i + 1) + ":");
+            marksFields[i] = new JTextField(5);
+
+            mainPanel.add(subjectLabel);
+            mainPanel.add(marksFields[i]);
+        }
+
+        calculateButton = new JButton("Calculate");
+        resultLabel = new JLabel();
+        resultLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        mainPanel.add(new JLabel()); // Empty cell
+        mainPanel.add(calculateButton);
+        mainPanel.add(resultLabel);
+        mainPanel.add(new JLabel()); // Empty cell
+
+        add(mainPanel);
+
+        // Add ActionListener to the Calculate button
+        calculateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                calculateGrade();
+            }
+        });
+    }
+
+    private void calculateGrade() {
+        double totalMarks = 0;
+        double averagePercentage;
+
+        // Calculate total marks and validate input
+        for (int i = 0; i < NUM_SUBJECTS; i++) {
+            String input = marksFields[i].getText();
+            int marks = Integer.parseInt(input);
+
+            if (marks < 0 || marks > 100) {
+                // Display an error message for invalid input
+                JOptionPane.showMessageDialog(this, "Invalid marks. Marks should be between 0 and 100.");
+                return;
+            }
+
+            totalMarks += marks;
+        }
+
+        averagePercentage = totalMarks / NUM_SUBJECTS;
+        String grade;
+
+        // Determine the grade based on the average percentage
+        if (averagePercentage >= 90) {
+            grade = "A+";
+        } else if (averagePercentage >= 80) {
+            grade = "A";
+        } else if (averagePercentage >= 70) {
+            grade = "B";
+        } else if (averagePercentage >= 60) {
+            grade = "C";
+        } else if (averagePercentage >= 50) {
+            grade = "D";
+        } else {
+            grade = "F";
+        }
+
+        // Construct the result message and display it with HTML formatting
+        String resultMessage = "Total Marks: " + totalMarks + "<br>Average Percentage: " + averagePercentage + "%<br>Grade: " + grade;
+        resultLabel.setText("<html>" + resultMessage + "</html>");
+
+        // Revalidate and repaint the frame to update the result label
+        revalidate();
+        repaint();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new GradeCalculatorGUI().setVisible(true);
+            }
+        });
+    }
+}
