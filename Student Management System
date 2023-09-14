@@ -1,0 +1,135 @@
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+class StudentManagementSystemFX extends Application {
+    // ObservableList to store and display student data in the TableView
+    private ObservableList<Student> students = FXCollections.observableArrayList();
+    private TableView<Student> studentTable;
+    private TextField nameField, rollNumberField, gradeField;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Student Management System");
+
+        BorderPane borderPane = new BorderPane();
+
+        // Create a table view to display students
+        studentTable = new TableView<>();
+        studentTable.setItems(students);
+        TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        TableColumn<Student, Integer> rollNumberColumn = new TableColumn<>("Roll Number");
+        rollNumberColumn.setCellValueFactory(cellData -> cellData.getValue().rollNumberProperty().asObject());
+        TableColumn<Student, Character> gradeColumn = new TableColumn<>("Grade");
+        gradeColumn.setCellValueFactory(cellData -> cellData.getValue().gradeProperty().asString());
+        studentTable.getColumns().addAll(nameColumn, rollNumberColumn, gradeColumn);
+
+        // Create a form to add students
+        GridPane form = new GridPane();
+        form.setHgap(10);
+        form.setVgap(5);
+        form.setPadding(new Insets(10, 10, 10, 10));
+
+        nameField = new TextField();
+        nameField.setPromptText("Name");
+        rollNumberField = new TextField();
+        rollNumberField.setPromptText("Roll Number");
+        gradeField = new TextField();
+        gradeField.setPromptText("Grade");
+        Button addButton = new Button("Add Student");
+        addButton.setOnAction(e -> addStudent());
+
+        form.add(nameField, 0, 0);
+        form.add(rollNumberField, 1, 0);
+        form.add(gradeField, 2, 0);
+        form.add(addButton, 3, 0);
+
+        loadStudentDataFromCSV(); // Load student data from CSV
+
+        borderPane.setCenter(studentTable);
+        borderPane.setBottom(form);
+
+        Scene scene = new Scene(borderPane, 600, 400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void addStudent() {
+        // Retrieve data from input fields
+        String name = nameField.getText();
+        int rollNumber = Integer.parseInt(rollNumberField.getText());
+        char grade = gradeField.getText().charAt(0);
+
+        // Create a new Student object and add it to the ObservableList
+        Student student = new Student(name, rollNumber, grade);
+        students.add(student);
+
+        // Clear input fields
+        nameField.clear();
+        rollNumberField.clear();
+        gradeField.clear();
+    }
+
+    private void loadStudentDataFromCSV() {
+        String csvFile = "student_data.csv"; // Provide the correct file path
+        String line;
+        String csvSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(csvSplitBy);
+                if (data.length == 3) {
+                    // Parse data from CSV and create Student objects
+                    String name = data[0];
+                    int rollNumber = Integer.parseInt(data[1]);
+                    char grade = data[2].charAt(0);
+                    Student student = new Student(name, rollNumber, grade);
+
+                    // Add the Student object to the ObservableList
+                    students.add(student);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// Student class to represent individual students
+class Student {
+    private final String name;
+    private final int rollNumber;
+    private final char grade;
+
+    public Student(String name, int rollNumber, char grade) {
+        this.name = name;
+        this.rollNumber = rollNumber;
+        this.grade = grade;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getRollNumber() {
+        return rollNumber;
+    }
+
+    public char getGrade() {
+        return grade;
+    }
+}
